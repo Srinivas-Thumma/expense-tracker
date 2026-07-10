@@ -41,37 +41,6 @@ expense-tracker-v2/
     package.json
 ```
 
-## 5-Day Build Plan
-
-### Day 1
-
-- Run backend and frontend.
-- Create login/register APIs.
-- Connect frontend login form to backend.
-- Store JWT token in frontend.
-
-### Day 2
-
-- Build categories, income, and expenses APIs.
-- Add create/list/update/delete screens.
-
-### Day 3
-
-- Build dashboard totals.
-- Add expense-by-category pie chart.
-- Add budget APIs.
-
-### Day 4
-
-- Add reports.
-- Add profile update.
-- Add file upload for profile picture.
-
-### Day 5
-
-- Add email notifications.
-- Test all workflows.
-- Fix UI and bugs.
 
 ## Backend Setup
 
@@ -104,11 +73,6 @@ cd backend
 mvn spring-boot:run
 ```
 
-Health check:
-
-```text
-http://localhost:8080/api/health
-```
 
 ## Backend Features
 
@@ -210,18 +174,3 @@ npm run dev
 6. Register a new account.
 7. Add income, expenses, and budgets.
 
-## Beginner Notes
-
-Build one feature at a time. Do not start with email, reports, or admin features.
-
-Recommended order:
-
-1. Login/register
-2. Categories
-3. Income
-4. Expenses
-5. Dashboard
-6. Budget
-7. Reports
-8. Profile
-9. Email notifications
