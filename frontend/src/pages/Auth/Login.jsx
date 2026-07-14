@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Wallet } from "lucide-react";
-import { useAuth } from "../context/AuthContext.jsx";
-import api from "../services/api.js";
+import { useAuth } from "../../context/AuthContext.jsx";
+import api from "../../services/api.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,17 +12,25 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setSuccess("");
 
     try {
-      const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
-      const payload = mode === "login" ? { email, password } : { name, email, password };
-      const response = await api.post(endpoint, payload);
+      if (mode === "register") {
+        await api.post("/auth/register", { name, email, password });
+        setMode("login");
+        setPassword("");
+        setSuccess("Registration complete. You can log in now.");
+        return;
+      }
+
+      const response = await api.post("/auth/login", { email, password });
       login(response.data);
-      navigate("/dashboard");
+      navigate(response.data.role === "ROLE_ADMIN" ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Could not continue. Check your details.");
     }
@@ -37,8 +45,13 @@ export default function Login() {
           </div>
           <div>
             <h1 className="text-xl font-bold">Expense Tracker</h1>
-            <p className="text-sm text-slate-500">{mode === "login" ? "Login to continue" : "Create your account"}</p>
+            <p className="text-sm text-slate-500">{mode === "login" ? "Login to continue" : "Create a new account"}</p>
           </div>
+        </div>
+
+        <div className="mb-5 grid grid-cols-2 rounded-md bg-slate-100 p-1 text-sm font-semibold">
+          <button type="button" onClick={() => setMode("login")} className={`rounded px-3 py-2 ${mode === "login" ? "bg-white text-slate-950 shadow-sm" : "text-slate-500"}`}>Login</button>
+          <button type="button" onClick={() => setMode("register")} className={`rounded px-3 py-2 ${mode === "register" ? "bg-white text-slate-950 shadow-sm" : "text-slate-500"}`}>Register</button>
         </div>
 
         {mode === "register" && (
@@ -75,18 +88,13 @@ export default function Login() {
         />
 
         {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+        {success && <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{success}</p>}
 
         <button className="w-full rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">
-          {mode === "login" ? "Login" : "Register"}
+          {mode === "login" ? "Login" : "Create Account"}
         </button>
 
-        <button
-          type="button"
-          onClick={() => setMode(mode === "login" ? "register" : "login")}
-          className="mt-4 w-full text-sm font-medium text-emerald-700"
-        >
-          {mode === "login" ? "Need an account? Register" : "Already have an account? Login"}
-        </button>
+      
       </form>
     </div>
   );

@@ -3,11 +3,8 @@ package com.expensetracker.controller;
 import com.expensetracker.dto.AuthDtos.AuthResponse;
 import com.expensetracker.dto.AuthDtos.LoginRequest;
 import com.expensetracker.dto.AuthDtos.RegisterRequest;
-import com.expensetracker.entity.Category;
-import com.expensetracker.entity.CategoryType;
 import com.expensetracker.entity.Role;
 import com.expensetracker.entity.User;
-import com.expensetracker.repository.CategoryRepository;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.security.JwtService;
 import org.springframework.http.HttpStatus;
@@ -23,13 +20,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthController(UserRepository userRepository, CategoryRepository categoryRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
@@ -47,7 +42,6 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(Role.ROLE_USER);
         userRepository.save(user);
-        createDefaultCategories(user);
 
         return response(user);
     }
@@ -66,28 +60,16 @@ public class AuthController {
 
     private AuthResponse response(User user) {
         return new AuthResponse(
-                jwtService.generateToken(user.getEmail()),
+                jwtService.generateToken(
+        user.getEmail(),
+        user.getRole().name()
+                ),
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                user.getProfilePicture()
         );
     }
 
-    private void createDefaultCategories(User user) {
-        createCategory(user, "Salary", CategoryType.INCOME);
-        createCategory(user, "Freelance", CategoryType.INCOME);
-        createCategory(user, "Food", CategoryType.EXPENSE);
-        createCategory(user, "Rent", CategoryType.EXPENSE);
-        createCategory(user, "Travel", CategoryType.EXPENSE);
-        createCategory(user, "Shopping", CategoryType.EXPENSE);
-    }
-
-    private void createCategory(User user, String name, CategoryType type) {
-        Category category = new Category();
-        category.setUser(user);
-        category.setName(name);
-        category.setType(type);
-        categoryRepository.save(category);
-    }
 }

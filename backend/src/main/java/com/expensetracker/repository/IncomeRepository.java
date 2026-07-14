@@ -13,5 +13,10 @@ public interface IncomeRepository extends JpaRepository<Income, UUID> {
 
     List<Income> findByUserIdAndDateBetween(UUID userId, LocalDate start, LocalDate end);
 
+    List<Income> findByDateBetween(LocalDate start, LocalDate end);
+
     Optional<Income> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteByUserId(UUID userId);
+    
 }

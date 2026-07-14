@@ -32,15 +32,17 @@ public class CategoryController {
 
     @GetMapping
     public List<CategoryResponse> list(Authentication authentication) {
-        User user = userService.currentUser(authentication);
-        return categoryRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).stream().map(this::toResponse).toList();
+        return categoryRepository.findByUserIsNullOrderByNameAsc().stream().map(this::toResponse).toList();
     }
 
     @PostMapping
     public CategoryResponse create(@RequestBody CategoryRequest request, Authentication authentication) {
         User user = userService.currentUser(authentication);
+        if (!user.getRole().name().equals("ROLE_ADMIN")) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Only admins can create master categories");
+        }
         Category category = new Category();
-        category.setUser(user);
+        category.setUser(null);
         category.setName(request.name());
         category.setType(request.type());
         return toResponse(categoryRepository.save(category));
@@ -49,7 +51,10 @@ public class CategoryController {
     @PutMapping("/{id}")
     public CategoryResponse update(@PathVariable UUID id, @RequestBody CategoryRequest request, Authentication authentication) {
         User user = userService.currentUser(authentication);
-        Category category = categoryRepository.findByIdAndUserId(id, user.getId()).orElseThrow();
+        if (!user.getRole().name().equals("ROLE_ADMIN")) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Only admins can update master categories");
+        }
+        Category category = categoryRepository.findByIdAndUserIsNull(id).orElseThrow();
         category.setName(request.name());
         category.setType(request.type());
         return toResponse(categoryRepository.save(category));
@@ -58,7 +63,10 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id, Authentication authentication) {
         User user = userService.currentUser(authentication);
-        categoryRepository.findByIdAndUserId(id, user.getId()).ifPresent(categoryRepository::delete);
+        if (!user.getRole().name().equals("ROLE_ADMIN")) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Only admins can delete master categories");
+        }
+        categoryRepository.findByIdAndUserIsNull(id).ifPresent(categoryRepository::delete);
     }
 
     private CategoryResponse toResponse(Category category) {

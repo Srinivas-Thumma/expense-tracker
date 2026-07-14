@@ -64,7 +64,7 @@ public class IncomeController {
     }
 
     private void apply(Income income, MoneyRequest request, User user) {
-        Category category = categoryRepository.findByIdAndUserId(request.categoryId(), user.getId()).orElseThrow();
+        Category category = categoryRepository.findByIdAndUserIsNull(request.categoryId()).orElseThrow();
         income.setUser(user);
         income.setCategory(category);
         income.setAmount(request.amount());

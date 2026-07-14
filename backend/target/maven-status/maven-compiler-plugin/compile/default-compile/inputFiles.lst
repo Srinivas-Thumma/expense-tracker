@@ -1,4 +1,6 @@
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\config\SecurityConfig.java
+C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\config\WebConfig.java
+C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\AdminController.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\AuthController.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\BudgetController.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\CategoryController.java
@@ -8,8 +10,11 @@ C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\e
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\IncomeController.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\NotificationController.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\ProfileController.java
+C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\controller\UploadController.java
+C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\dto\AdminDtos.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\dto\AppDtos.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\dto\AuthDtos.java
+C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\dto\ProfilePictureResponse.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\entity\Budget.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\entity\Category.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\entity\CategoryType.java
@@ -28,6 +33,7 @@ C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\e
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\repository\UserRepository.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\security\JwtAuthenticationFilter.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\security\JwtService.java
+C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\service\AdminService.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\service\EmailService.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\service\FinanceService.java
 C:\Users\tumma\OneDrive\Documents\expense-tracker-v2\backend\src\main\java\com\expensetracker\service\UserService.java

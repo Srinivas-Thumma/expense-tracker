@@ -18,17 +18,28 @@ public class JwtService {
     @Value("${app.jwt.expiration-ms}")
     private long expirationMs;
 
-    public String generateToken(String email) {
-        Date now = new Date();
-        Date expiresAt = new Date(now.getTime() + expirationMs);
+    public String generateToken(String email, String role) {
+    Date now = new Date();
+    Date expiresAt = new Date(now.getTime() + expirationMs);
 
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(now)
-                .expiration(expiresAt)
-                .signWith(key())
-                .compact();
-    }
+    return Jwts.builder()
+            .subject(email)
+            .claim("role", role)
+            .issuedAt(now)
+            .expiration(expiresAt)
+            .signWith(key())
+            .compact();
+}
+
+    public String getRole(String token) {
+    Claims claims = Jwts.parser()
+            .verifyWith(key())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+
+    return claims.get("role", String.class);
+}
 
     public String getEmail(String token) {
         Claims claims = Jwts.parser()

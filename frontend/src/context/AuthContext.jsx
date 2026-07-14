@@ -23,13 +23,22 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateUser = (updates) => {
+    setUser((current) => {
+      const next = { ...current, ...updates };
+      localStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
+  };
+
   const value = useMemo(
     () => ({
       token,
       user,
       isAuthenticated: Boolean(token),
       login,
-      logout
+      logout,
+      updateUser
     }),
     [token, user]
   );

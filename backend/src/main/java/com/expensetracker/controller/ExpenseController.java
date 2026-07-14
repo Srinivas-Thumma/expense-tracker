@@ -69,7 +69,7 @@ public class ExpenseController {
     }
 
     private void apply(Expense expense, MoneyRequest request, User user) {
-        Category category = categoryRepository.findByIdAndUserId(request.categoryId(), user.getId()).orElseThrow();
+        Category category = categoryRepository.findByIdAndUserIsNull(request.categoryId()).orElseThrow();
         expense.setUser(user);
         expense.setCategory(category);
         expense.setAmount(request.amount());

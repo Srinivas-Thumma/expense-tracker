@@ -2,6 +2,9 @@ package com.expensetracker.service;
 
 import com.expensetracker.dto.AppDtos.CategoryTotal;
 import com.expensetracker.dto.AppDtos.DashboardResponse;
+import com.expensetracker.dto.AppDtos.MonthlyTotal;
+import com.expensetracker.dto.AppDtos.RecentTransaction;
+import com.expensetracker.dto.AppDtos.ReportResponse;
 import com.expensetracker.dto.AppDtos.Summary;
 import com.expensetracker.entity.Budget;
 import com.expensetracker.entity.Expense;
@@ -16,9 +19,13 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 
 @Service
@@ -67,6 +74,11 @@ public class FinanceService {
     }
 
     public DashboardResponse monthlyReport(User user, int year, int month) {
+        ReportResponse report = report(user, year, month);
+        return new DashboardResponse(report.summary(), report.expenseByCategory());
+    }
+
+    public ReportResponse report(User user, int year, int month) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
         List<Income> income = incomeRepository.findByUserIdAndDateBetween(user.getId(), start, end);
@@ -74,7 +86,13 @@ public class FinanceService {
 
         BigDecimal totalIncome = sumIncome(income);
         BigDecimal totalExpenses = sumExpenses(expenses);
-        return new DashboardResponse(new Summary(totalIncome, totalExpenses, totalIncome.subtract(totalExpenses)), List.of());
+        return new ReportResponse(
+                new Summary(totalIncome, totalExpenses, totalIncome.subtract(totalExpenses)),
+                totalsByExpenseCategory(expenses),
+                totalsByIncomeCategory(income),
+                monthlyTrend(user, YearMonth.of(year, month).minusMonths(5), YearMonth.of(year, month)),
+                recentTransactions(income, expenses)
+        );
     }
 
     public void checkBudget(User user) {
@@ -113,6 +131,75 @@ public class FinanceService {
 
     private BigDecimal sumExpenses(List<Expense> expenses) {
         return expenses.stream().map(Expense::getAmount).map(this::safe).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<CategoryTotal> totalsByExpenseCategory(List<Expense> expenses) {
+        Map<String, BigDecimal> totals = new LinkedHashMap<>();
+        for (Expense expense : expenses) {
+            String category = expense.getCategory() == null ? "Uncategorized" : expense.getCategory().getName();
+            totals.merge(category, safe(expense.getAmount()), BigDecimal::add);
+        }
+        return totals.entrySet().stream()
+                .map(entry -> new CategoryTotal(entry.getKey(), entry.getValue()))
+                .sorted((left, right) -> right.amount().compareTo(left.amount()))
+                .toList();
+    }
+
+    private List<CategoryTotal> totalsByIncomeCategory(List<Income> income) {
+        Map<String, BigDecimal> totals = new LinkedHashMap<>();
+        for (Income item : income) {
+            String category = item.getCategory() == null ? "Uncategorized" : item.getCategory().getName();
+            totals.merge(category, safe(item.getAmount()), BigDecimal::add);
+        }
+        return totals.entrySet().stream()
+                .map(entry -> new CategoryTotal(entry.getKey(), entry.getValue()))
+                .sorted((left, right) -> right.amount().compareTo(left.amount()))
+                .toList();
+    }
+
+    private List<MonthlyTotal> monthlyTrend(User user, YearMonth startMonth, YearMonth endMonth) {
+        List<MonthlyTotal> totals = new java.util.ArrayList<>();
+        YearMonth current = startMonth;
+        while (!current.isAfter(endMonth)) {
+            LocalDate start = current.atDay(1);
+            LocalDate end = current.atEndOfMonth();
+            String label = current.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + " " + current.getYear();
+            totals.add(new MonthlyTotal(
+                    label,
+                    sumIncome(incomeRepository.findByUserIdAndDateBetween(user.getId(), start, end)),
+                    sumExpenses(expenseRepository.findByUserIdAndDateBetween(user.getId(), start, end))
+            ));
+            current = current.plusMonths(1);
+        }
+        return totals;
+    }
+
+    private List<RecentTransaction> recentTransactions(List<Income> income, List<Expense> expenses) {
+        List<RecentTransaction> transactions = new java.util.ArrayList<>();
+        for (Income item : income) {
+            transactions.add(new RecentTransaction(
+                    item.getId(),
+                    "Income",
+                    item.getCategory() == null ? "Uncategorized" : item.getCategory().getName(),
+                    item.getAmount(),
+                    item.getDate(),
+                    item.getDescription()
+            ));
+        }
+        for (Expense item : expenses) {
+            transactions.add(new RecentTransaction(
+                    item.getId(),
+                    "Expense",
+                    item.getCategory() == null ? "Uncategorized" : item.getCategory().getName(),
+                    item.getAmount(),
+                    item.getDate(),
+                    item.getDescription()
+            ));
+        }
+        return transactions.stream()
+                .sorted(Comparator.comparing(RecentTransaction::date).reversed())
+                .limit(8)
+                .toList();
     }
 
     private BigDecimal safe(BigDecimal value) {

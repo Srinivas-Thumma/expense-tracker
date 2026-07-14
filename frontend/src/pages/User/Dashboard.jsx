@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import PageHeader from "../components/PageHeader.jsx";
-import api from "../services/api.js";
+import PageHeader from "../../components/PageHeader.jsx";
+import api from "../../services/api.js";
 
-const colors = ["#059669", "#2563eb", "#f59e0b", "#dc2626"];
+const colors = ["#62D0C3", "#7062D8", "#C96A95", "#B98D48"];
 
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState({

@@ -48,4 +48,16 @@ public class AppDtos {
     public record CategoryTotal(String category, BigDecimal amount) {}
 
     public record DashboardResponse(Summary summary, List<CategoryTotal> expenseByCategory) {}
+
+    public record MonthlyTotal(String month, BigDecimal income, BigDecimal expenses) {}
+
+    public record RecentTransaction(UUID id, String kind, String categoryName, BigDecimal amount, LocalDate date, String description) {}
+
+    public record ReportResponse(
+            Summary summary,
+            List<CategoryTotal> expenseByCategory,
+            List<CategoryTotal> incomeByCategory,
+            List<MonthlyTotal> monthlyTrend,
+            List<RecentTransaction> recentTransactions
+    ) {}
 }

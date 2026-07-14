@@ -1,6 +1,7 @@
 package com.expensetracker.controller;
 
 import com.expensetracker.dto.AppDtos.DashboardResponse;
+import com.expensetracker.dto.AppDtos.ReportResponse;
 import com.expensetracker.entity.User;
 import com.expensetracker.service.FinanceService;
 import com.expensetracker.service.UserService;
@@ -30,14 +31,14 @@ public class DashboardController {
     }
 
     @GetMapping("/reports/monthly")
-    public DashboardResponse monthlyReport(
+    public ReportResponse monthlyReport(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
             Authentication authentication
     ) {
         LocalDate now = LocalDate.now();
         User user = userService.currentUser(authentication);
-        return financeService.monthlyReport(
+        return financeService.report(
                 user,
                 year == null ? now.getYear() : year,
                 month == null ? now.getMonthValue() : month

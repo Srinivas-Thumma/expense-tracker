@@ -14,4 +14,12 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     List<Category> findByUserIdAndTypeOrderByNameAsc(UUID userId, CategoryType type);
 
     Optional<Category> findByIdAndUserId(UUID id, UUID userId);
+
+    List<Category> findByUserIsNullOrderByNameAsc();
+
+    List<Category> findByUserIsNullAndTypeOrderByNameAsc(CategoryType type);
+
+    Optional<Category> findByIdAndUserIsNull(UUID id);
+
+    void deleteByUserId(UUID userId);
 }

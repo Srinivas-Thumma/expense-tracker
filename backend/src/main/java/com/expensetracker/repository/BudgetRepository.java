@@ -11,4 +11,6 @@ public interface BudgetRepository extends JpaRepository<Budget, UUID> {
     List<Budget> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
     Optional<Budget> findByIdAndUserId(UUID id, UUID userId);
+
+    void deleteByUserId(UUID userId);
 }

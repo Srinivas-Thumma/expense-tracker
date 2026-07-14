@@ -9,5 +9,5 @@ public class AuthDtos {
 
     public record LoginRequest(String email, String password) {}
 
-    public record AuthResponse(String token, UUID id, String name, String email, Role role) {}
+    public record AuthResponse(String token, UUID id, String name, String email, Role role, String profilePicture) {}
 }

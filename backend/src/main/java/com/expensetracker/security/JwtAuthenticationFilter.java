@@ -16,12 +16,13 @@ import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    // private final UserRepository userRepository;
 
     public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        // this.userRepository = userRepository;
     }
 
     @Override
@@ -36,12 +37,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = header.substring(7);
+
             String email = jwtService.getEmail(token);
-            userRepository.findByEmail(email).ifPresent(user -> {
-                var authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
-                var authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            });
+            String role = jwtService.getRole(token);
+
+            var authentication = new UsernamePasswordAuthenticationToken(
+            email,null,List.of(new SimpleGrantedAuthority(role))
+             );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
         } catch (Exception ignored) {
             SecurityContextHolder.clearContext();
         }
