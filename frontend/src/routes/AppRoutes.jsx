@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 import MainLayout from "../components/layout/MainLayout.jsx";
@@ -13,6 +13,7 @@ import Reports from "../pages/User/Reports.jsx";
 import Profile from "../pages/User/Profile.jsx";
 
 import Login from "../pages/Auth/Login.jsx";
+import Landing from "../pages/Landing.jsx";
 
 
 import AdminDashboard from "../pages/Admin/AdminDashboard.jsx";
@@ -27,14 +28,13 @@ export default function AppRoutes() {
   return (
     <Routes>
 
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
 
       <Route element={<ProtectedRoute />}>
 
         {/* USER ROUTES */}
         <Route element={<MainLayout />}>
-
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/income" element={<Income />} />

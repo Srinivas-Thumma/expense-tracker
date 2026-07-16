@@ -1,4 +1,4 @@
-# Expense Tracker
+# Expenza
 
 Beginner-friendly full-stack expense tracker based on this stack:
 

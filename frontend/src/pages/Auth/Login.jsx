@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import api from "../../services/api.js";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(searchParams.get("mode") === "register" ? "register" : "login");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -21,10 +22,9 @@ export default function Login() {
 
     try {
       if (mode === "register") {
-        await api.post("/auth/register", { name, email, password });
-        setMode("login");
-        setPassword("");
-        setSuccess("Registration complete. You can log in now.");
+        const response = await api.post("/auth/register", { name, email, password });
+        login(response.data);
+        navigate(response.data.role === "ROLE_ADMIN" ? "/admin" : "/dashboard");
         return;
       }
 
@@ -32,7 +32,7 @@ export default function Login() {
       login(response.data);
       navigate(response.data.role === "ROLE_ADMIN" ? "/admin" : "/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Could not continue. Check your details.");
+      setError(authErrorMessage(err));
     }
   };
 
@@ -44,7 +44,7 @@ export default function Login() {
             <Wallet size={22} />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Expense Tracker</h1>
+            <h1 className="text-xl font-bold">Expenza</h1>
             <p className="text-sm text-slate-500">{mode === "login" ? "Login to continue" : "Create a new account"}</p>
           </div>
         </div>
@@ -98,4 +98,10 @@ export default function Login() {
       </form>
     </div>
   );
+}
+
+function authErrorMessage(err) {
+  const data = err.response?.data;
+  if (typeof data === "string") return data;
+  return data?.message || data?.error || data?.detail || err.message || "Could not continue. Check your details.";
 }

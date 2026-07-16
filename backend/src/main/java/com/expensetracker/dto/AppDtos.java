@@ -47,7 +47,9 @@ public class AppDtos {
 
     public record CategoryTotal(String category, BigDecimal amount) {}
 
-    public record DashboardResponse(Summary summary, List<CategoryTotal> expenseByCategory) {}
+    public record ExpensePeriodSummary(BigDecimal today, BigDecimal week, BigDecimal month, BigDecimal year) {}
+
+    public record DashboardResponse(Summary summary, List<CategoryTotal> expenseByCategory, ExpensePeriodSummary expensePeriods) {}
 
     public record MonthlyTotal(String month, BigDecimal income, BigDecimal expenses) {}
 

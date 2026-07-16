@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
+import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/PageHeader.jsx";
 import api, { API_ORIGIN } from "../../services/api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
-  const { updateUser } = useAuth();
+  const { logout, updateUser } = useAuth();
   const [form, setForm] = useState({ name: "", phone: "", email: "", profilePicture: "" });
   const [saved, setSaved] = useState(false);
 
@@ -41,6 +44,11 @@ export default function Profile() {
     setForm(response.data);
     updateUser({ name: response.data.name, profilePicture: response.data.profilePicture });
     setSaved(true);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
   };
 
   const profileSrc = form.profilePicture
@@ -88,6 +96,22 @@ export default function Profile() {
           {saved && <p className="text-sm font-medium text-emerald-700">Profile saved.</p>}
         </div>
       </form>
+
+      <div className="mx-auto mt-4 max-w-3xl rounded-lg border border-red-400/30 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-semibold text-slate-950">Account session</h3>
+            <p className="text-sm text-slate-500">Sign out of Expenza on this device.</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-red-300 bg-[#ff1f1f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e60000]"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
+      </div>
     </section>
   );
 }
