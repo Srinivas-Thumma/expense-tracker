@@ -57,7 +57,7 @@ export default function AdminDashboard() {
   return (
     <section>
       <PageHeader
-        title="Expense Tracker"
+        title="Expenza"
         description="Platform-level users, totals, and transaction activity."
         actions={<button onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"><Plus size={16} /> Add New User</button>}
       />

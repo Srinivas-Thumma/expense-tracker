@@ -51,6 +51,7 @@ com\expensetracker\dto\AppDtos$MoneyResponse.class
 com\expensetracker\dto\AppDtos$Summary.class
 com\expensetracker\dto\AppDtos$CategoryTotal.class
 com\expensetracker\dto\AppDtos$RecentTransaction.class
+com\expensetracker\dto\AppDtos$ExpensePeriodSummary.class
 com\expensetracker\dto\AdminDtos$AdminUserFinanceResponse.class
 com\expensetracker\config\SecurityConfig.class
 com\expensetracker\config\WebConfig.class

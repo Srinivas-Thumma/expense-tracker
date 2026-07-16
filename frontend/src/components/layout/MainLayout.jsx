@@ -1,7 +1,6 @@
-import { Navigate, NavLink, Outlet } from "react-router-dom";
+import { Link, Navigate, NavLink, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
-  LogOut,
   PieChart,
   Receipt,
   Target,
@@ -26,7 +25,7 @@ function avatarUrl(user) {
 }
 
 export default function MainLayout() {
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
 
   if (user?.role === "ROLE_ADMIN") {
     return <Navigate to="/admin" replace />;
@@ -59,14 +58,10 @@ export default function MainLayout() {
         </nav>
 
         <div className="absolute bottom-6 left-4 right-4">
-          <p className="mb-3 text-center text-lg font-bold tracking-wide text-slate-100">Expense Tracker</p>
-          <button
-            onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-300 bg-[#ff1f1f] py-3 text-sm font-semibold text-white hover:bg-[#e60000]"
-          >
-            <LogOut size={17} />
-            Logout
-          </button>
+          <Link to="/dashboard" className="flex items-center justify-center gap-2 rounded-lg border border-teal-300/25 bg-teal-300/10 px-3 py-3 text-lg font-black tracking-wide text-teal-100 hover:bg-teal-300/15">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-teal-300 text-sm font-black text-slate-950 shadow-[0_0_16px_rgba(98,208,195,0.45)]">E</span>
+            Expenza
+          </Link>
         </div>
       </aside>
 

@@ -8,7 +8,7 @@ export default function Settings() {
 
   return (
     <section>
-      <PageHeader title="Expense Tracker" description="System preferences, access controls, and operational safeguards." />
+      <PageHeader title="Expenza" description="System preferences, access controls, and operational safeguards." />
 
       <div className="grid gap-5 xl:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

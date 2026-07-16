@@ -4,7 +4,9 @@ import com.expensetracker.dto.AdminDtos.AdminDashboardResponse;
 import com.expensetracker.dto.AdminDtos.AdminUserFinanceResponse;
 import com.expensetracker.dto.AdminDtos.CreateUserRequest;
 import com.expensetracker.dto.AdminDtos.UserResponse;
+import com.expensetracker.dto.AppDtos.BudgetRequest;
 import com.expensetracker.dto.AppDtos.BudgetResponse;
+import com.expensetracker.dto.AppDtos.MoneyRequest;
 import com.expensetracker.dto.AppDtos.MoneyResponse;
 import com.expensetracker.dto.AppDtos.MonthlyTotal;
 import com.expensetracker.entity.Expense;
@@ -14,6 +16,7 @@ import com.expensetracker.entity.Category;
 import com.expensetracker.entity.CategoryType;
 import com.expensetracker.entity.Role;
 import com.expensetracker.entity.User;
+import com.expensetracker.entity.RecurrenceType;
 import com.expensetracker.repository.BudgetRepository;
 import com.expensetracker.repository.CategoryRepository;
 import com.expensetracker.repository.ExpenseRepository;
@@ -146,6 +149,64 @@ public class AdminService {
         );
     }
 
+    public MoneyResponse createUserIncome(UUID userId, MoneyRequest request) {
+        User user = getUser(userId);
+        Income income = new Income();
+        applyMoney(income, request, user);
+        return toMoneyResponse(incomeRepository.save(income));
+    }
+
+    public MoneyResponse updateUserIncome(UUID userId, UUID incomeId, MoneyRequest request) {
+        User user = getUser(userId);
+        Income income = incomeRepository.findByIdAndUserId(incomeId, userId).orElseThrow(() -> new RuntimeException("Income not found"));
+        applyMoney(income, request, user);
+        return toMoneyResponse(incomeRepository.save(income));
+    }
+
+    public void deleteUserIncome(UUID userId, UUID incomeId) {
+        incomeRepository.findByIdAndUserId(incomeId, userId).ifPresent(incomeRepository::delete);
+    }
+
+    public MoneyResponse createUserExpense(UUID userId, MoneyRequest request) {
+        User user = getUser(userId);
+        Expense expense = new Expense();
+        applyMoney(expense, request, user);
+        MoneyResponse response = toMoneyResponse(expenseRepository.save(expense));
+        financeService.checkBudget(user);
+        return response;
+    }
+
+    public MoneyResponse updateUserExpense(UUID userId, UUID expenseId, MoneyRequest request) {
+        User user = getUser(userId);
+        Expense expense = expenseRepository.findByIdAndUserId(expenseId, userId).orElseThrow(() -> new RuntimeException("Expense not found"));
+        applyMoney(expense, request, user);
+        MoneyResponse response = toMoneyResponse(expenseRepository.save(expense));
+        financeService.checkBudget(user);
+        return response;
+    }
+
+    public void deleteUserExpense(UUID userId, UUID expenseId) {
+        expenseRepository.findByIdAndUserId(expenseId, userId).ifPresent(expenseRepository::delete);
+    }
+
+    public BudgetResponse createUserBudget(UUID userId, BudgetRequest request) {
+        User user = getUser(userId);
+        Budget budget = new Budget();
+        applyBudget(budget, request, user);
+        return toBudgetResponse(budgetRepository.save(budget));
+    }
+
+    public BudgetResponse updateUserBudget(UUID userId, UUID budgetId, BudgetRequest request) {
+        User user = getUser(userId);
+        Budget budget = budgetRepository.findByIdAndUserId(budgetId, userId).orElseThrow(() -> new RuntimeException("Budget not found"));
+        applyBudget(budget, request, user);
+        return toBudgetResponse(budgetRepository.save(budget));
+    }
+
+    public void deleteUserBudget(UUID userId, UUID budgetId) {
+        budgetRepository.findByIdAndUserId(budgetId, userId).ifPresent(budgetRepository::delete);
+    }
+
    public UserResponse updateRole(UUID id, Role role) {
 
     User user = userRepository.findById(id)
@@ -174,6 +235,40 @@ public class AdminService {
         category.setName(name);
         category.setType(type);
         categoryRepository.save(category);
+    }
+
+    private User getUser(UUID id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private void applyMoney(Income income, MoneyRequest request, User user) {
+        Category category = categoryRepository.findByIdAndUserIsNull(request.categoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
+        income.setUser(user);
+        income.setCategory(category);
+        income.setAmount(request.amount());
+        income.setDate(request.date());
+        income.setDescription(request.description());
+        income.setRecurring(request.recurring());
+        income.setRecurrenceType(request.recurrenceType() == null ? RecurrenceType.NONE : request.recurrenceType());
+    }
+
+    private void applyMoney(Expense expense, MoneyRequest request, User user) {
+        Category category = categoryRepository.findByIdAndUserIsNull(request.categoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
+        expense.setUser(user);
+        expense.setCategory(category);
+        expense.setAmount(request.amount());
+        expense.setDate(request.date());
+        expense.setDescription(request.description());
+        expense.setRecurring(request.recurring());
+        expense.setRecurrenceType(request.recurrenceType() == null ? RecurrenceType.NONE : request.recurrenceType());
+    }
+
+    private void applyBudget(Budget budget, BudgetRequest request, User user) {
+        budget.setUser(user);
+        budget.setBudgetType(request.budgetType());
+        budget.setAmount(request.amount());
+        budget.setStartDate(request.startDate());
+        budget.setEndDate(request.endDate());
     }
 
     private UserResponse toUserResponse(User user) {

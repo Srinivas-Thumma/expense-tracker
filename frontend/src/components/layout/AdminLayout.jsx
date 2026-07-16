@@ -1,9 +1,8 @@
-import { Navigate, NavLink, Outlet } from "react-router-dom";
+import { Link, Navigate, NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   FolderTree,
   LayoutDashboard,
-  LogOut,
   Settings,
   UserCircle,
   Users
@@ -26,7 +25,7 @@ function avatarUrl(user) {
 }
 
 export default function AdminLayout() {
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
 
   if (user?.role !== "ROLE_ADMIN") {
     return <Navigate to="/dashboard" replace />;
@@ -60,14 +59,10 @@ export default function AdminLayout() {
         </nav>
 
         <div className="absolute bottom-6 left-4 right-4">
-          <p className="mb-3 text-center text-lg font-bold tracking-wide text-slate-100">Expense Tracker</p>
-          <button
-            onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-300 bg-[#ff1f1f] py-3 text-sm font-semibold text-white hover:bg-[#e60000]"
-          >
-            <LogOut size={17} />
-            Logout
-          </button>
+          <Link to="/admin" className="flex items-center justify-center gap-2 rounded-lg border border-sky-300/25 bg-sky-300/10 px-3 py-3 text-lg font-black tracking-wide text-sky-100 hover:bg-sky-300/15">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-sky-300 text-sm font-black text-slate-950 shadow-[0_0_16px_rgba(125,211,252,0.45)]">E</span>
+            Expenza
+          </Link>
         </div>
       </aside>
 

@@ -2,6 +2,7 @@ package com.expensetracker.service;
 
 import com.expensetracker.dto.AppDtos.CategoryTotal;
 import com.expensetracker.dto.AppDtos.DashboardResponse;
+import com.expensetracker.dto.AppDtos.ExpensePeriodSummary;
 import com.expensetracker.dto.AppDtos.MonthlyTotal;
 import com.expensetracker.dto.AppDtos.RecentTransaction;
 import com.expensetracker.dto.AppDtos.ReportResponse;
@@ -20,7 +21,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.DayOfWeek;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,13 +72,19 @@ public class FinanceService {
 
         return new DashboardResponse(
                 new Summary(totalIncome, totalExpenses, totalIncome.subtract(totalExpenses)),
-                categoryTotals
+                categoryTotals,
+                expensePeriods(expenses)
         );
     }
 
     public DashboardResponse monthlyReport(User user, int year, int month) {
         ReportResponse report = report(user, year, month);
-        return new DashboardResponse(report.summary(), report.expenseByCategory());
+        List<Expense> expenses = expenseRepository.findByUserIdAndDateBetween(
+                user.getId(),
+                LocalDate.of(year, month, 1),
+                LocalDate.of(year, month, 1).withDayOfMonth(LocalDate.of(year, month, 1).lengthOfMonth())
+        );
+        return new DashboardResponse(report.summary(), report.expenseByCategory(), expensePeriods(expenses));
     }
 
     public ReportResponse report(User user, int year, int month) {
@@ -131,6 +140,30 @@ public class FinanceService {
 
     private BigDecimal sumExpenses(List<Expense> expenses) {
         return expenses.stream().map(Expense::getAmount).map(this::safe).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private ExpensePeriodSummary expensePeriods(List<Expense> expenses) {
+        LocalDate today = LocalDate.now();
+        LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate monthStart = today.withDayOfMonth(1);
+        LocalDate yearStart = today.withDayOfYear(1);
+
+        return new ExpensePeriodSummary(
+                sumExpensesBetween(expenses, today, today),
+                sumExpensesBetween(expenses, weekStart, today),
+                sumExpensesBetween(expenses, monthStart, today),
+                sumExpensesBetween(expenses, yearStart, today)
+        );
+    }
+
+    private BigDecimal sumExpensesBetween(List<Expense> expenses, LocalDate startDate, LocalDate endDate) {
+        return expenses.stream()
+                .filter(expense -> expense.getDate() != null
+                        && !expense.getDate().isBefore(startDate)
+                        && !expense.getDate().isAfter(endDate))
+                .map(Expense::getAmount)
+                .map(this::safe)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private List<CategoryTotal> totalsByExpenseCategory(List<Expense> expenses) {
