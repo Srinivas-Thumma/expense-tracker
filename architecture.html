@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker Architecture v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0d14;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 32px 16px 48px;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 11px;
+    color: #475569;
+    margin-bottom: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .version-badge {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+  .version-badge span {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+  }
+
+  .diagram {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* LAYERS */
+  .layer {
+    width: 100%;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+  }
+
+  .layer-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .layer-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    opacity: 0.2;
+    background: currentColor;
+  }
+
+  .layer-frontend  { background: #0d1433; border: 1px solid #1e3a8a; }
+  .layer-frontend .layer-label { color: #7ba7f7; }
+
+  .layer-security  { background: #1a0f0a; border: 1px solid #7c2d12; }
+  .layer-security .layer-label { color: #fb923c; }
+
+  .layer-backend   { background: #0a1a10; border: 1px solid #14532d; }
+  .layer-backend .layer-label { color: #4ade80; }
+
+  .layer-scheduler { background: #130f1a; border: 1px solid #4c1d95; }
+  .layer-scheduler .layer-label { color: #a78bfa; }
+
+  .layer-db        { background: #0f0a1a; border: 1px solid #581c87; }
+  .layer-db .layer-label { color: #c084fc; }
+
+  .layer-notify    { background: #0a1520; border: 1px solid #0c4a6e; }
+  .layer-notify .layer-label { color: #38bdf8; }
+
+  /* Section titles inside layers */
+  .sec { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #64748b; margin: 12px 0 6px; }
+  .sec:first-of-type { margin-top: 0; }
+
+  /* Card rows */
+  .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; margin-bottom: 4px; }
+
+  /* Cards */
+  .card {
+    border-radius: 9px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+    line-height: 1.4;
+  }
+
+  .c-blue   { background: #172554; border: 1px solid #2563eb; color: #93c5fd; }
+  .c-orange { background: #431407; border: 1px solid #c2410c; color: #fdba74; }
+  .c-green  { background: #052e16; border: 1px solid #16a34a; color: #86efac; }
+  .c-green2 { background: #0a2e16; border: 1px solid #15803d; color: #6ee7a0; font-size: 11px; }
+  .c-purple { background: #1e1030; border: 1px solid #7c3aed; color: #c4b5fd; }
+  .c-sky    { background: #082040; border: 1px solid #0284c7; color: #7dd3fc; }
+  .c-db     { background: #1a0a30; border: 1px solid #9333ea; color: #e9d5ff; font-size: 11px; }
+  .c-yellow { background: #1c1400; border: 1px solid #a16207; color: #fde68a; font-size: 11px; }
+
+  /* Badges */
+  .badge-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .badge {
+    font-size: 10px; padding: 3px 9px; border-radius: 6px;
+    background: #0f172a; border: 1px solid #1e293b; color: #64748b; font-weight: 600;
+  }
+  .badge.new { border-color: #4ade80; color: #4ade80; background: #052e16; }
+  .badge.imp { border-color: #f59e0b; color: #f59e0b; background: #1c1400; }
+
+  /* Info boxes */
+  .infobox {
+    border-radius: 10px; padding: 10px 16px; font-size: 11px;
+    text-align: center; width: 100%; margin-top: 8px; line-height: 1.6;
+  }
+  .infobox-orange { background: #1c0d05; border: 1px solid #7c2d12; color: #fdba74; }
+  .infobox-green  { background: #052e16; border: 1px solid #15803d; color: #86efac; }
+  .infobox-purple { background: #130a2a; border: 1px solid #6d28d9; color: #c4b5fd; }
+  .infobox-sky    { background: #061525; border: 1px solid #0369a1; color: #7dd3fc; }
+
+  /* Arrow connector */
+  .arrow {
+    display: flex; flex-direction: column; align-items: center; margin: 3px 0;
+  }
+  .arr-line { width: 2px; height: 18px; background: #1e293b; }
+  .arr-label {
+    font-size: 9px; color: #475569; letter-spacing: 1.5px; text-transform: uppercase;
+    background: #0a0d14; padding: 2px 10px; border-radius: 4px;
+    border: 1px solid #1e293b; margin: 2px 0;
+  }
+  .arr-head { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #334155; }
+
+  /* Two-column split */
+  .split { display: flex; gap: 8px; width: 100%; }
+  .split > .layer { flex: 1; }
+</style>
+</head>
+<body>
+
+<h1>Expense Tracker</h1>
+<p class="subtitle">Full Stack Architecture</p>
+<div class="version-badge"><span>Java 21 · Spring Boot · React · PostgreSQL</span></div>
+
+<div class="diagram">
+
+  <!-- ═══ FRONTEND ═══ -->
+  <div class="layer layer-frontend">
+    <div class="layer-label">Frontend — React · Axios · Tailwind CSS · Recharts</div>
+
+    <div class="sec">Pages</div>
+    <div class="row">
+      <div class="card c-blue">Login / Register</div>
+      <div class="card c-blue">Dashboard</div>
+      <div class="card c-blue">Income</div>
+      <div class="card c-blue">Expenses</div>
+      <div class="card c-blue">Categories</div>
+      <div class="card c-blue">Budget</div>
+      <div class="card c-blue">Reports</div>
+      <div class="card c-blue">Profile</div>
+    </div>
+
+    <div class="sec">Dashboard Charts (Recharts)</div>
+    <div class="row">
+      <div class="card c-blue">🥧 Pie Chart<br><small>Expense by Category</small></div>
+      <div class="card c-blue">📊 Bar Chart<br><small>Monthly Expenses</small></div>
+      <div class="card c-blue">📈 Line Chart<br><small>Income vs Expense Trend</small></div>
+    </div>
+
+    <div class="sec">Frontend Structure</div>
+    <div class="badge-row">
+      <span class="badge">pages/</span>
+      <span class="badge">components/</span>
+      <span class="badge">services/</span>
+      <span class="badge">hooks/</span>
+      <span class="badge">context/</span>
+      <span class="badge">routes/</span>
+      <span class="badge">assets/</span>
+    </div>
+
+    <div class="infobox infobox-orange" style="margin-top:10px">
+      🔐 JWT stored in memory · sent as <strong>Authorization: Bearer &lt;token&gt;</strong> on every request · Protected routes redirect unauthenticated users to /login
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arr-line"></div>
+    <div class="arr-label">HTTP · REST API Calls via Axios</div>
+    <div class="arr-line"></div>
+    <div class="arr-head"></div>
+  </div>
+
+  <!-- ═══ SECURITY ═══ -->
+  <div class="layer layer-security">
+    <div class="layer-label">Security — Spring Security · JWT Filter · BCrypt</div>
+    <div class="row">
+      <div class="card c-orange">JWT Validation<br>Filter</div>
+      <div class="card c-orange">BCrypt Password<br>Encryption</div>
+      <div class="card c-orange">Public Routes<br>/auth/**</div>
+      <div class="card c-orange">Protected Routes<br>All Others</div>
+      <div class="card c-orange">ROLE_USER<br><small style="color:#94a3b8">(ROLE_ADMIN future)</small></div>
+    </div>
+    <div class="infobox infobox-orange">
+      Invalid / missing token → <strong>401 Unauthorized</strong> immediately · Role-based authorization ready for future admin expansion
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arr-line"></div>
+    <div class="arr-label">Validated & Authorized Request</div>
+    <div class="arr-line"></div>
+    <div class="arr-head"></div>
+  </div>
+
+  <!-- ═══ BACKEND ═══ -->
+  <div class="layer layer-backend">
+    <div class="layer-label">Backend — Java 21 · Spring Boot · Spring Data JPA · Hibernate · Maven</div>
+
+    <div class="sec">Controllers (REST API Endpoints)</div>
+    <div class="row">
+      <div class="card c-green2">POST /auth/register<br>POST /auth/login</div>
+      <div class="card c-green2">GET PUT /profile<br>POST /profile/upload-image</div>
+      <div class="card c-green2">GET POST PUT DELETE<br>/categories</div>
+      <div class="card c-green2">GET POST PUT DELETE<br>/income · search · filter</div>
+      <div class="card c-green2">GET POST PUT DELETE<br>/expenses · search · filter</div>
+      <div class="card c-green2">GET POST PUT<br>/budgets</div>
+      <div class="card c-green2">GET /dashboard<br>totals · balance · utilization</div>
+      <div class="card c-green2">GET /reports<br>monthly · category · trend</div>
+      <div class="card c-green2">GET PUT<br>/notifications</div>
+    </div>
+
+    <div class="sec">Service Layer — Business Logic</div>
+    <div class="row">
+      <div class="card c-green">Auth Service</div>
+      <div class="card c-green">Profile Service</div>
+      <div class="card c-green">Category Service</div>
+      <div class="card c-green">Income Service</div>
+      <div class="card c-green">Expense Service</div>
+      <div class="card c-green">Budget Service</div>
+      <div class="card c-green">Report Service</div>
+      <div class="card c-green">Notification Service</div>
+    </div>
+
+    <div class="sec">Backend Structure</div>
+    <div class="badge-row">
+      <span class="badge">controller/</span>
+      <span class="badge">service/</span>
+      <span class="badge">repository/</span>
+      <span class="badge">entity/</span>
+      <span class="badge">dto/</span>
+      <span class="badge">mapper/</span>
+      <span class="badge">security/</span>
+      <span class="badge">config/</span>
+      <span class="badge">exception/</span>
+      <span class="badge">scheduler/</span>
+      <span class="badge">util/</span>
+    </div>
+
+    <div class="infobox infobox-green">
+      💡 Budget exceeded → Expense Service triggers Notification Service → saves alert to DB + sends email via Spring Mail<br>
+      🔄 @Scheduled daily job → auto-creates next recurring income/expense entries (MONTHLY · WEEKLY · YEARLY)
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arr-line"></div>
+    <div class="arr-label">Spring Data JPA · Hibernate ORM</div>
+    <div class="arr-line"></div>
+    <div class="arr-head"></div>
+  </div>
+
+  <!-- ═══ DATABASE ═══ -->
+  <div class="layer layer-db">
+    <div class="layer-label">Database — PostgreSQL</div>
+    <div class="row">
+      <div class="card c-db">👤 users<br><small>id · name · email · password<br>phone · profile_picture<br>role · created_at · updated_at</small></div>
+      <div class="card c-db">🗂 categories<br><small>id · user_id · name<br>type (INCOME/EXPENSE)<br>created_at · updated_at</small></div>
+      <div class="card c-db">💰 income<br><small>id · user_id · category_id<br>amount · date · description<br>is_recurring · recurrence_type</small></div>
+      <div class="card c-db">💸 expenses<br><small>id · user_id · category_id<br>amount · date · description<br>is_recurring · recurrence_type</small></div>
+      <div class="card c-db">📋 budgets<br><small>id · user_id · budget_type<br>amount · start_date<br>end_date · created_at</small></div>
+      <div class="card c-db">🔔 notifications<br><small>id · user_id · message<br>is_read · created_at</small></div>
+    </div>
+    <div class="badge-row">
+      <span class="badge imp">UUID primary keys</span>
+      <span class="badge imp">user_id foreign keys on all tables</span>
+      <span class="badge new">is_recurring flag</span>
+      <span class="badge new">recurrence_type MONTHLY/WEEKLY/YEARLY</span>
+      <span class="badge new">role column on users</span>
+    </div>
+  </div>
+
+  <!-- ═══ EMAIL NOTIFICATION ═══ -->
+  <div class="arrow">
+    <div class="arr-line"></div>
+    <div class="arr-label">Spring Mail (SMTP)</div>
+    <div class="arr-line"></div>
+    <div class="arr-head"></div>
+  </div>
+
+  <div class="layer layer-notify">
+    <div class="layer-label">Email Notifications — Spring Boot Mail</div>
+    <div class="row">
+      <div class="card c-sky">⚠️ Budget Limit<br>Reached Alert</div>
+      <div class="card c-sky">🚨 Budget<br>Exceeded Alert</div>
+      <div class="card c-sky">📅 Monthly Budget<br>Reminder</div>
+    </div>
+    <div class="infobox infobox-sky">
+      Triggered by Notification Service → sends real email to user's registered address via SMTP (Gmail / any provider)
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
